@@ -1,0 +1,51 @@
+---
+- name: install dependency package
+  yum: name={{ item }} state=latest
+  with_items:
+    - ncurses-devel
+    - ruby
+    - ruby-devel
+    - lua
+    - lua-devel
+    - luajit
+    - luajit-devel
+    - ctags
+    - mercurial
+    - python
+    - python-devel
+    - tcl-devel
+    - perl
+    - perl-devel
+    - perl-ExtUtils-ParseXS
+    - perl-ExtUtils-CBuilder
+    - perl-ExtUtils-Embed
+  tags: vim
+- name: git clone vim
+  git: repo=https://github.com/vim/vim.git dest=/tmp/vim depth=1 update=no
+  tags: vim
+- name: configure vim
+  command: >
+    ./configure --prefix=/usr/local
+    --with-features=huge
+    --enable-multibyte
+    --enable-fail-if-missing
+    --disable-gui
+    --disable-xim
+    --disable-selinux
+    --disable-gpm
+    --disable-darwin
+    --enable-fontset
+    --enable-luainterp
+    --with-luajit
+    --enable-perlinterp
+    --enable-pythoninterp=yes
+    --enable-rubyinterp=dynamic
+    chdir=/tmp/vim
+    creates=/tmp/vim/src/vim
+  tags: vim
+- name: make vim
+  command: chdir=/tmp/vim creates=/usr/local/bin/vim make
+  tags: vim
+- name: install vim
+  command: chdir=/tmp/vim creates=/usr/local/bin/vim make install
+  tags: vim

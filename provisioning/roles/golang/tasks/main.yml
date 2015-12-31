@@ -1,0 +1,14 @@
+---
+- name: install golang
+  yum: name=go state=latest
+  sudo: yes
+  tags: golang
+- name: Ensure fragments profile dir exists
+  file: dest={{ ansible_user_dir }}/.profile.d/ state=directory
+  tags: golang
+- name: Installs golang sh file
+  copy: src=golang.sh dest={{ ansible_user_dir }}/.profile.d/golang.sh
+  tags: golang
+- name: Source golang sh file in dot bash_profile
+  lineinfile: dest={{ ansible_user_dir }}/.bash_profile line="source ~/.profile.d/golang.sh" create=yes
+  tags: golang

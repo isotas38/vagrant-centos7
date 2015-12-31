@@ -1,0 +1,35 @@
+---
+- name: check installed pyenv
+  command: $SHELL -lc "type pyenv"
+  register: pyenv_installed
+  failed_when: pyenv_installed.rc not in [0, 1]
+  tags: pyenv
+- name: git clone pyenv
+  git: repo=https://github.com/yyuu/pyenv.git dest={{ ansible_user_dir }}/.pyenv depth=1 update=no
+  when: pyenv_installed|failed
+  tags: pyenv
+- name: Ensure fragments profile dir exists
+  file: dest={{ ansible_user_dir }}/.profile.d/ state=directory
+  when: pyenv_installed|failed
+  tags: pyenv
+- name: Installs pyenv sh file
+  copy: src=pyenv.sh dest={{ ansible_user_dir }}/.profile.d/pyenv.sh
+  when: pyenv_installed|failed
+  tags: pyenv
+- name: Source pyenv sh file in dot zshenv
+  lineinfile: dest={{ ansible_user_dir }}/.bash_profile line="source ~/.profile.d/pyenv.sh" create=yes
+  when: pyenv_installed|failed
+  tags: pyenv
+- name: check latest python version
+  command: $SHELL -lc "pyenv install --list | grep '^  [0-9].[0-9].[0-9]$' | tail -n 1"
+  register: latest_python_version
+  when: pyenv_installed|failed
+  tags: pyenv
+- name: install python
+  command: $SHELL -lc "pyenv install {{ latest_python_version.stdout }}"
+  when: pyenv_installed|failed
+  tags: pyenv
+- name: python global
+  command: $SHELL -lc "pyenv global {{ latest_python_version.stdout }}"
+  when: pyenv_installed|failed
+  tags: pyenv

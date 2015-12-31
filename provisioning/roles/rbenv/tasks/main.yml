@@ -1,0 +1,39 @@
+---
+- name: check installed rbenv
+  command: $SHELL -lc "type rbenv"
+  register: rbenv_installed
+  failed_when: rbenv_installed.rc not in [0, 1]
+  tags: rbenv
+- name: git clone rbenv
+  git: repo=https://github.com/sstephenson/rbenv.git dest={{ ansible_user_dir }}/.rbenv depth=1 update=no
+  when: rbenv_installed|failed
+  tags: rbenv
+- name: Installs ruby-build
+  git: repo=https://github.com/sstephenson/ruby-build.git dest={{ ansible_user_dir }}/.rbenv/plugins/ruby-build
+  when: rbenv_installed|failed
+  tags: rbenv
+- name: Ensure fragments profile dir exists
+  file: dest={{ ansible_user_dir }}/.profile.d/ state=directory
+  when: rbenv_installed|failed
+  tags: rbenv
+- name: Installs rbenv sh file
+  copy: src=rbenv.sh dest={{ ansible_user_dir }}/.profile.d/rbenv.sh
+  when: rbenv_installed|failed
+  tags: rbenv
+- name: Source rbenv sh file in dot bash_profile
+  lineinfile: dest={{ ansible_user_dir }}/.bash_profile line="source ~/.profile.d/rbenv.sh" create=yes
+  when: rbenv_installed|failed
+  tags: rbenv
+- name: check latest ruby version
+  command: $SHELL -lc "rbenv install --list | grep '^  [0-9].[0-9].[0-9]$' | tail -n 1"
+  register: latest_ruby_version
+  when: rbenv_installed|failed
+  tags: rbenv
+- name: install ruby
+  command: $SHELL -lc "rbenv install {{ latest_ruby_version.stdout }}"
+  when: rbenv_installed|failed
+  tags: rbenv
+- name: ruby global
+  command: $SHELL -lc "rbenv global {{ latest_ruby_version.stdout }}"
+  when: rbenv_installed|failed
+  tags: rbenv

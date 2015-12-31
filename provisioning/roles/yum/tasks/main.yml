@@ -1,0 +1,33 @@
+---
+- name: upgrade all packages
+  yum: name=* state=latest
+  tags: yumupdate
+- name: install epel-release
+  yum: name=epel-release state=latest
+  tags: yuminstall
+- name: install Development Tools
+  yum: name="@Development tools" state=latest
+  tags: yuminstall
+- name: install build depends
+  yum: name={{ item }} state=latest
+  with_items:
+    - bzip2
+    - bzip2-devel
+    - gcc
+    - gdbm-devel
+    - libffi-devel
+    - libyaml-devel
+    - ncurses-devel
+    - openssl-devel
+    - readline-devel
+    - sqlite
+    - sqlite-devel
+    - zlib-devel
+  tags: yuminstall
+- name: install packages
+  yum: name={{ item }} state=latest
+  with_items:
+    - git
+    - tree
+    - zsh
+  tags: yuminstall

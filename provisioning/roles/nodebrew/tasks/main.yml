@@ -1,0 +1,30 @@
+---
+- name: check installed nodebrew
+  command: $SHELL -lc "type nodebrew"
+  register: nodebrew_installed
+  failed_when: nodebrew_installed.rc not in [0, 1]
+  tags: nodebrew
+- name: nodebrew install
+  shell: curl -L https://raw.githubusercontent.com/hokaccha/nodebrew/master/nodebrew | perl - setup
+  when: nodebrew_installed|failed
+  tags: nodebrew
+- name: Ensure fragments profile dir exists
+  file: dest={{ ansible_user_dir }}/.profile.d/ state=directory
+  when: nodebrew_installed|failed
+  tags: nodebrew
+- name: Installs nodebrew sh file
+  copy: src=nodebrew.sh dest={{ ansible_user_dir }}/.profile.d/nodebrew.sh
+  when: nodebrew_installed|failed
+  tags: nodebrew
+- name: Source nodebrew sh file in dot bash_profile
+  lineinfile: dest={{ ansible_user_dir }}/.bash_profile line="source ~/.profile.d/nodebrew.sh" create=yes
+  when: nodebrew_installed|failed
+  tags: nodebrew
+- name: install node
+  command: $SHELL -lc "nodebrew install-binary stable"
+  when: nodebrew_installed|failed
+  tags: nodebrew
+- name: use node
+  command: $SHELL -lc "nodebrew use stable"
+  when: nodebrew_installed|failed
+  tags: nodebrew

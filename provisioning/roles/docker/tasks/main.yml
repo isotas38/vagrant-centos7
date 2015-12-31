@@ -1,0 +1,13 @@
+---
+- name: copy docker.repo
+  copy: src=docker.repo dest=/etc/yum.repos.d/docker.repo
+  tags: docker
+- name: install dependencies
+  yum: name=device-mapper-libs state=latest
+  tags: docker
+- name: install docker-engine
+  yum: name=docker-engine
+  tags: docker
+- name: systemctl start docker
+  service: name=docker state=started enabled=yes
+  tags: docker

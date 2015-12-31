@@ -1,0 +1,17 @@
+---
+- name: sudo play
+  hosts: all
+  sudo: yes
+  roles:
+    - yum
+    - postgresql
+    - docker
+    - vim
+
+- name: vagrant play
+  hosts: all
+  roles:
+    - golang
+    - nodebrew
+    - pyenv
+    - rbenv
